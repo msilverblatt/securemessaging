@@ -4,7 +4,6 @@ function createUser(){
 	});
 }
 
-$( "#signup").click(function(){
+$("#signup").click(function(){
 		createUser();
-	});
-}
+});

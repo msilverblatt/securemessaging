@@ -12,6 +12,7 @@ var db = mongodb.Db.connect(process.env.MONGOHQ_URL, function(error, client) {
 exports.register = function(req, res)
 {
     var obj = req.body;
+    console.log(res);
     if (obj.user && obj.pubkey) {
         db.collection("users", function(error, collection) {
             collection.insert({user: obj.user, pubkey: obj.pubkey}, function(error, records) {
