@@ -66,3 +66,19 @@ exports.send = function(req, res)
     }
 }
 
+exports.getmessages = function(req, res)
+{
+    var obj = req.body;
+    if (obj.user) {
+        db.collection("messages", function(error, collection) {
+            collection.find({user: obj.user}, {file: 0, recipient: 0, sender: 0, symkey: 0}).toArray(function(error, items) {
+                if (error) {
+                    return res.send("getmessagesError");
+                }
+                else{
+                    return res.send(items);
+                }
+            });
+        });
+    }
+}
