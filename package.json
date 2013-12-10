@@ -1,10 +1,10 @@
 {
-    "name": "Grades",
+    "name": "MCMS",
     "version": "0.0.1",
     "dependencies":
     {
         "express": "latest",
-        "mongodb": "latest",
+        "mongodb": "latest"
     },
     "engines":
     {
