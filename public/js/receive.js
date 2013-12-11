@@ -1,6 +1,7 @@
 function getMessages(){
 	console.log("clicked get messages");
-	$("#mtable").removeClass("invisible");
+//	$("#mtable").removeClass("invisible");
+//	$("#alerts").empty();
 	var mysender = $("#sender").val();
 	var getting = $.post('/getmessages', { user:mysender });
 	getting.done(function(data, res){
@@ -8,6 +9,7 @@ function getMessages(){
 			console.log(data,res);
 			console.log(data.length);
 			$("#tbody").empty();
+			var any = false;
 			for (var m in data){
 				console.log(data[m].sender);
 				var pkey =$("#pkey").val();
@@ -15,7 +17,18 @@ function getMessages(){
 				var unencrypted = decrypt(pkey, data[m].text);
 				console.log(data[m].text);
 				console.log(unencrypted);
-				if (unencrypted) $("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].subject+"</td><td>"+unencrypted+"</td></tr>");
+				if (unencrypted) {
+					if (!any){
+						any = true;
+						$("#mtable").removeClass("invisible");
+						$("#alerts").empty();
+					}
+					$("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].subject+"</td><td>"+unencrypted+"</td></tr>");
+				}
+			}
+			if (any == false) {
+				$("#mtable").addClass("invisible");
+				$('#alerts').append("<div class='panel callout radius'><h4>No messages for that username/passphrase combo.</h4></div>");
 			}
 		});
 //		data.map(function(item){

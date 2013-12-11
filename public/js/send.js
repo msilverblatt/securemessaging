@@ -13,8 +13,6 @@ function sendMessage(){
 		if (data == "sendSuccess") {
 			clearForms();
 			$('#alerts').append("<div class='panel callout radius'><h4>Message Sent!</h4></div>");
-			$('#submit').addClass("disabled");
-			$('#clear').addClass("disabled");
 			$('#submit').attr('onclick','null');
 			$('#clear').attr('onclick','null');
 		}
