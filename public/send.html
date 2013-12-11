@@ -1,0 +1,41 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/foundation.css">
+<link rel="stylesheet" type="text/css" href="css/custom.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/send.js"></script>
+</head>
+<body>
+	<div class="row">
+  <div class="large-12 columns">
+  	  	<h1>Ming Chow Messaging System</h1>
+  	  	<h4>Send Message</h4>
+  </div>
+</div>
+<div class="row">
+<div class="large-4 large-centered columns">
+<div class="panel">
+
+<label>Your Username</label>
+<input type="text" id="sender" placeholder="Who are you?">
+
+<label>Recipient</label>
+<input type="text" id="recipient" placeholder="Who are you sending this to?">
+
+<label>Message</label>
+<textarea id="message" placeholder="What would you like to say?">
+</textarea>
+
+<label>Private Key</label>
+<textarea id="pkey" placeholder="Copy & Paste your private key for encryption.">
+</textarea>
+
+<div class="row">
+<div class="large-6 large-centered columns">
+<a href="#" data-type="button" onclick="sendMessage();" id= "signup" class="medium success button">Submit</a>
+</div></div>
+</div>
+</div>
+</div>
+
+</body>

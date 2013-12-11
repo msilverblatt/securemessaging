@@ -12,11 +12,12 @@ var db = mongodb.Db.connect(process.env.MONGOHQ_URL, function(error, client) {
 exports.register = function(req, res)
 {
     var obj = req.body;
-    console.log(res);
+    console.log(obj);
     if (obj.user && obj.pubkey) {
         db.collection("users", function(error, collection) {
             collection.insert({user: obj.user, pubkey: obj.pubkey}, function(error, records) {
                 if (error) {
+                    console.log(error);
                     return res.send("userError");
                 }
                 else{
@@ -69,14 +70,19 @@ exports.send = function(req, res)
 
 exports.getmessages = function(req, res)
 {
+    console.log("at getmessages");
+    console.log(req.body.user);
     var obj = req.body;
     if (obj.user) {
         db.collection("messages", function(error, collection) {
-            collection.find({user: obj.user}, {file: 0, recipient: 0, sender: 0, symkey: 0}).toArray(function(error, items) {
+            collection.find({recipient:obj.user}).toArray(function(error, items) {
                 if (error) {
+                    console.log("error with getmessages");
                     return res.send("getmessagesError");
                 }
                 else{
+                    console.log("getmessages successful?");
+                    console.log(items.length);
                     return res.send(items);
                 }
             });

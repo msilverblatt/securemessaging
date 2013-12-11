@@ -1,0 +1,48 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/foundation.css">
+<link rel="stylesheet" type="text/css" href="css/custom.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script type="text/javascript" src="js/receive.js"></script>
+</head>
+<body>
+	<div class="row">
+  <div class="large-12 columns">
+  	  	<h1>Ming Chow Messaging System</h1>
+  	  	<h4>Receive Messages</h4>
+  </div>
+</div>
+<div class="row">
+<div class="large-6 large-centered columns">
+<div class="panel">
+
+<label>Your Username</label>
+<input type="text" id="sender" placeholder="Who are you?">
+
+
+<label>Private Key</label>
+<div class="row">
+<div class="large-8 columns">
+
+<textarea id="pkey" placeholder="Copy & Paste your private key for decryption.">
+</textarea>
+</div>
+<div class="large-4 columns">
+<a href="#" data-type="button" onclick="getMessages();" id= "display" class="medium success button">Display</a>
+</div>
+</div>
+<table id="mtable">
+	<thead>
+		<tr>
+			<th width="25%">From</th>
+			<th width="100%">Message</th>
+		</tr>
+	</thead>
+	<tbody id="tbody">
+	</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</body>
