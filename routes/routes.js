@@ -27,16 +27,16 @@ exports.register = function(req, res)
         });
     }
     else{
-        return response.send("inputError");
+        return res.send("inputError");
     }
 }
 
 exports.send = function(req, res)
 {
     var obj = req.body;
-    if (obj.recipient && obj.symkey && obj.file && obj.sender) {
+    if (obj.recipient && obj.symkey && obj.text && obj.sender) {
         db.collection("messages", function(error, collection) {
-            collection.insert({file: obj.file, symkey: obj.symkey, recipient: obj.recipient, sender: obj.sender}, function(error, records) {
+            collection.insert({text: obj.text, symkey: obj.symkey, recipient: obj.recipient, sender: obj.sender}, function(error, records) {
                 if (error) {
                     return res.send("sendError");
                 }
@@ -47,7 +47,7 @@ exports.send = function(req, res)
         });
     }
     else{
-        return response.send("inputError");
+        return res.send("inputError");
     }
 }
 
@@ -67,7 +67,7 @@ exports.getmessages = function(req, res)
         });
     }
     else{
-        return response.send("inputError");
+        return res.send("inputError");
     }
 }
 
@@ -92,7 +92,7 @@ exports.getmessage = function(req, res)
         });
     }
     else{
-        return response.send("inputError");
+        return res.send("inputError");
     }
 }
 
@@ -112,6 +112,6 @@ exports.pubkey = function(req, res)
         });
     }
     else{
-        return response.send("inputError");
+        return res.send("inputError");
     }
 }

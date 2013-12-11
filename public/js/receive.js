@@ -9,7 +9,7 @@ function getMessages(){
 			$("#tbody").empty();
 			for (var m in data){
 				console.log(data[m].sender);
-				$("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].file+"</td></tr>");
+				$("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].text+"</td></tr>");
 			}
 		});
 //		data.map(function(item){
