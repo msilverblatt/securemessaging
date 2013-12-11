@@ -10,13 +10,25 @@ function sendMessage(){
 	$.post('/send', { sender:senduser, recipient:myrecipient, text:mymessage, subject:mysubject}, function(data, status, res) {
 		console.log("submitted request");
 		console.log(status, res, data);
+		if (data == "sendSuccess") {
+			clearForms();
+			$('#alerts').append("<div class='panel callout radius'><h4>Message Sent!</h4></div>");
+			$('#submit').addClass("disabled");
+			$('#clear').addClass("disabled");
+			$('#submit').attr('onclick','null');
+			$('#clear').attr('onclick','null');
+		}
+		else {
+//			alert("Error registering!");
+			console.log("appending");
+			$('#alerts').append("<div class='panel callout radius'><h4>Error Sending Message!</h4></div>");
+		}
 	});
 }
 
 function clearForms(){
 	$(".form").each(function(index, element){
 		element.value = "";
-		val = "";
-console.log(element);
 	});
+	$("#alerts").empty();
 }

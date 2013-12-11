@@ -39,17 +39,20 @@
   </div>
 </div>
 <div class="row">
-<div class="large-5 large-centered columns">
-<div class="panel">
+<div class="large-7 large-centered columns">
+<div class="panel" id="main">
 <label>Username</label>
-<input type="text" id="uname" placeholder="Ex. MingChow35">
+<input type="text" id="uname" class="form" placeholder="Ex. MingChow35">
 <label>Bio</label>
-<textarea id="bio" placeholder="Tell us about yourself">
+<textarea id="bio" class="form" placeholder="Tell us about yourself">
 </textarea>
 <div class="row">
 <div class="large-6 large-centered columns">
+<a href="#" data-type="button" onclick="clearForms();" id= "clear" class="medium alert button">Clear</a>
 <a href="#" data-type="button" onclick="createUser();" id= "signup" class="medium success button">Submit</a>
-</div></div>
+</div>
+</div>
+<div id="alerts"></div>
 </div>
 </div>
 </div>
