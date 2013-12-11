@@ -28,6 +28,7 @@ function getMessages(){
 			}
 			if (any == false) {
 				$("#mtable").addClass("invisible");
+				$('#alerts').empty();
 				$('#alerts').append("<div class='panel callout radius'><h4>No messages for that username/passphrase combo.</h4></div>");
 			}
 		});
