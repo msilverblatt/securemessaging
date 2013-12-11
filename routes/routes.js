@@ -76,7 +76,7 @@ exports.getmessage = function(req, res)
     var obj = req.body;
     if (obj._id) {
         db.collection("messages", function(error, collection) {
-            collection.findOne({_id: obj._id}, {file: 1, symkey: 1}, function(error, doc) {
+            collection.findOne({_id: obj._id}, {_id: 0, file: 1, symkey: 1}, function(error, doc) {
                 if (error) {
                     return res.send("getmessageError");
                 }
