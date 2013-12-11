@@ -11,7 +11,7 @@ app.listen(port, function() {
 var routes = require('./routes/routes');
 //get requests
 app.get('/', function(req, res) {
-  res.sendfile('public/index.html');
+  res.sendfile('public/register.html');
 });
 
 app.get('/send', function(req, res) {
