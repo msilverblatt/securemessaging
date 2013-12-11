@@ -12,9 +12,9 @@ exports.register = function(req, res)
 {
     var obj = req.body;
     console.log(obj);
-    if (obj.user && obj.pubkey) {
+    if (obj.user && obj.bio) {
         db.collection("users", function(error, collection) {
-            collection.insert({user: obj.user, pubkey: obj.pubkey}, function(error, records) {
+            collection.insert({user: obj.user, bio: obj.bio}, function(error, records) {
                 if (error) {
                     console.log(error);
                     return res.send("registerError");

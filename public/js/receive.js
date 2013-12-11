@@ -1,5 +1,6 @@
 function getMessages(){
 	console.log("clicked get messages");
+	$("#mtable").removeClass("invisible");
 	var mysender = $("#sender").val();
 	var getting = $.post('/getmessages', { user:mysender });
 	getting.done(function(data, res){

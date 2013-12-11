@@ -12,3 +12,11 @@ function sendMessage(){
 		console.log(status, res, data);
 	});
 }
+
+function clearForms(){
+	$(".form").each(function(index, element){
+		element.value = "";
+		val = "";
+console.log(element);
+	});
+}

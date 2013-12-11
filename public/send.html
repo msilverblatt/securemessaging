@@ -53,23 +53,24 @@
 <div class="panel">
 
 <label>Your Username</label>
-<input type="text" id="sender" placeholder="Who are you?">
+<input class="form" type="text" id="sender" placeholder="Who are you?">
 
 <label>Recipient</label>
-<input type="text" id="recipient" placeholder="Who are you sending this to?">
+<input class="form" type="text" id="recipient" placeholder="Who are you sending this to?">
 
 <label>Subject</label>
-<input type="text" id="subject" placeholder="Whatchu talkin' bout, Willis?">
+<input class="form" type="text" id="subject" placeholder="Whatchu talkin' bout, Willis?">
 
 <label>Message</label>
-<textarea id="message" placeholder="What would you like to say?">
+<textarea class="form" id="message" placeholder="What would you like to say?">
 </textarea>
 
 <label>Secret Passphrase</label>
-<input type="text" id="passphrase" placeholder="Be sure to give this to the recipient">
+<input class="form" type="text" id="passphrase" placeholder="Be sure to give this to the recipient">
 
 <div class="row">
 <div class="large-6 large-centered columns">
+<a href="#" data-type="button" onclick="clearForms();" id= "clear" class="medium alert button">Clear</a>
 <a href="#" data-type="button" onclick="sendMessage();" id= "signup" class="medium success button">Submit</a>
 </div></div>
 </div>
