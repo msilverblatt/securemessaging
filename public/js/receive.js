@@ -9,7 +9,12 @@ function getMessages(){
 			$("#tbody").empty();
 			for (var m in data){
 				console.log(data[m].sender);
-				$("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].text+"</td></tr>");
+				var pkey =$("#pkey").val();
+				console.log(pkey);
+				var unencrypted = decrypt(pkey, data[m].text);
+				console.log(data[m].text);
+				console.log(unencrypted);
+				if (unencrypted) $("#tbody").append("<tr><td>"+data[m].sender+"</td><td>"+data[m].subject+"</td><td>"+unencrypted+"</td></tr>");
 			}
 		});
 //		data.map(function(item){
@@ -21,4 +26,19 @@ function getMessages(){
 //		}
 
 
+}
+
+$(".data").click(function(){
+console.log(this.val());
+	this.val(decrypt("hello", this.val()));
+})
+
+function decryptMessage(id){
+	var picker= "'#" + id.toString() + "'";
+	console.log(picker);
+//	var m = $(picker);
+
+	console.log($(picker).val());
+	var newval = decrypt("hello", $(picker).val()	)
+	$(picker).val(decrypt("hello", m.val()));
 }

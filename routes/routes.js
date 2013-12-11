@@ -34,9 +34,9 @@ exports.register = function(req, res)
 exports.send = function(req, res)
 {
     var obj = req.body;
-    if (obj.recipient && obj.symkey && obj.text && obj.sender) {
+    if (obj.recipient && obj.subject && obj.text && obj.sender) {
         db.collection("messages", function(error, collection) {
-            collection.insert({text: obj.text, symkey: obj.symkey, recipient: obj.recipient, sender: obj.sender}, function(error, records) {
+            collection.insert({text: obj.text, recipient: obj.recipient, sender: obj.sender, subject:obj.subject}, function(error, records) {
                 if (error) {
                     return res.send("sendError");
                 }
