@@ -1,1 +1,484 @@
-if(typeof(pidCrypt)!="undefined"&&typeof(BigInteger)!="undefined"&&typeof(SecureRandom)!="undefined"&&typeof(Arcfour)!="undefined"){function parseBigInt(b,a){return new BigInteger(b,a)}function linebrk(c,d){var a="";var b=0;while(b+d<c.length){a+=c.substring(b,b+d)+"\n";b+=d}return a+c.substring(b,c.length)}function byte2Hex(a){if(a<16){return"0"+a.toString(16)}else{return a.toString(16)}}function pkcs1unpad2(f,g){var a=f.toByteArray();var e=0;while(e<a.length&&a[e]==0){++e}if(a.length-e!=g-1||a[e]!=2){return null}++e;while(a[e]!=0){if(++e>=a.length){return null}}var c="";while(++e<a.length){c+=String.fromCharCode(a[e])}return c}function pkcs1pad2(d,f){if(f<d.length+11){alert("Message too long for RSA");return null}var e=new Array();var c=d.length-1;while(c>=0&&f>0){e[--f]=d.charCodeAt(c--)}e[--f]=0;var b=new SecureRandom();var a=new Array();while(f>2){a[0]=0;while(a[0]==0){b.nextBytes(a)}e[--f]=a[0]}e[--f]=2;e[--f]=0;return new BigInteger(e)}pidCrypt.RSA=function(){this.n=null;this.e=0;this.d=null;this.p=null;this.q=null;this.dmp1=null;this.dmq1=null;this.coeff=null};pidCrypt.RSA.prototype.doPrivate=function(a){if(this.p==null||this.q==null){return a.modPow(this.d,this.n)}var c=a.mod(this.p).modPow(this.dmp1,this.p);var b=a.mod(this.q).modPow(this.dmq1,this.q);while(c.compareTo(b)<0){c=c.add(this.p)}return c.subtract(b).multiply(this.coeff).mod(this.p).multiply(this.q).add(b)};pidCrypt.RSA.prototype.setPublic=function(c,b,a){if(typeof(a)=="undefined"){a=16}if(c!=null&&b!=null&&c.length>0&&b.length>0){this.n=parseBigInt(c,a);this.e=parseInt(b,a)}else{alert("Invalid RSA public key")}};pidCrypt.RSA.prototype.doPublic=function(a){return a.modPowInt(this.e,this.n)};pidCrypt.RSA.prototype.encryptRaw=function(d){var a=pkcs1pad2(d,(this.n.bitLength()+7)>>3);if(a==null){return null}var e=this.doPublic(a);if(e==null){return null}var b=e.toString(16);if((b.length&1)==0){return b}else{return"0"+b}};pidCrypt.RSA.prototype.encrypt=function(a){a=pidCryptUtil.encodeBase64(a);return this.encryptRaw(a)};pidCrypt.RSA.prototype.decryptRaw=function(b){var d=parseBigInt(b,16);var a=this.doPrivate(d);if(a==null){return null}return pkcs1unpad2(a,(this.n.bitLength()+7)>>3)};pidCrypt.RSA.prototype.decrypt=function(b){var a=this.decryptRaw(b);a=(a)?pidCryptUtil.decodeBase64(a):"";return a};pidCrypt.RSA.prototype.setPrivate=function(d,b,c,a){if(typeof(a)=="undefined"){a=16}if(d!=null&&b!=null&&d.length>0&&b.length>0){this.n=parseBigInt(d,a);this.e=parseInt(b,a);this.d=parseBigInt(c,a)}else{alert("Invalid RSA private key")}};pidCrypt.RSA.prototype.setPrivateEx=function(e,i,a,d,c,h,g,b,f){if(typeof(f)=="undefined"){f=16}if(e!=null&&i!=null&&e.length>0&&i.length>0){this.n=parseBigInt(e,f);this.e=parseInt(i,f);this.d=parseBigInt(a,f);this.p=parseBigInt(d,f);this.q=parseBigInt(c,f);this.dmp1=parseBigInt(h,f);this.dmq1=parseBigInt(g,f);this.coeff=parseBigInt(b,f)}else{alert("Invalid RSA private key")}};pidCrypt.RSA.prototype.generate=function(b,i){var a=new SecureRandom();var f=b>>1;this.e=parseInt(i,16);var c=new BigInteger(i,16);for(;;){for(;;){this.p=new BigInteger(b-f,1,a);if(this.p.subtract(BigInteger.ONE).gcd(c).compareTo(BigInteger.ONE)==0&&this.p.isProbablePrime(10)){break}}for(;;){this.q=new BigInteger(f,1,a);if(this.q.subtract(BigInteger.ONE).gcd(c).compareTo(BigInteger.ONE)==0&&this.q.isProbablePrime(10)){break}}if(this.p.compareTo(this.q)<=0){var h=this.p;this.p=this.q;this.q=h}var g=this.p.subtract(BigInteger.ONE);var d=this.q.subtract(BigInteger.ONE);var e=g.multiply(d);if(e.gcd(c).compareTo(BigInteger.ONE)==0){this.n=this.p.multiply(this.q);this.d=c.modInverse(e);this.dmp1=this.d.mod(g);this.dmq1=this.d.mod(d);this.coeff=this.q.modInverse(this.p);break}}};pidCrypt.RSA.prototype.getASNData=function(a){var e={};var c=[];var d=0;if(a.value&&a.type=="INTEGER"){c[d++]=a.value}if(a.sub){for(var b=0;b<a.sub.length;b++){c=c.concat(this.getASNData(a.sub[b]))}}return c};pidCrypt.RSA.prototype.setKeyFromASN=function(c,e){var d=["N","E","D","P","Q","DP","DQ","C"];var f={};var a=this.getASNData(e);switch(c){case"Public":case"public":for(var b=0;b<a.length;b++){f[d[b]]=a[b].toLowerCase()}this.setPublic(f.N,f.E,16);break;case"Private":case"private":for(var b=1;b<a.length;b++){f[d[b-1]]=a[b].toLowerCase()}this.setPrivateEx(f.N,f.E,f.D,f.P,f.Q,f.DP,f.DQ,f.C,16);break}};pidCrypt.RSA.prototype.setPublicKeyFromASN=function(a){this.setKeyFromASN("public",a)};pidCrypt.RSA.prototype.setPrivateKeyFromASN=function(a){this.setKeyFromASN("private",a)};pidCrypt.RSA.prototype.getParameters=function(){var a={};if(this.n!=null){a.n=this.n}a.e=this.e;if(this.d!=null){a.d=this.d}if(this.p!=null){a.p=this.p}if(this.q!=null){a.q=this.q}if(this.dmp1!=null){a.dmp1=this.dmp1}if(this.dmq1!=null){a.dmq1=this.dmq1}if(this.coeff!=null){a.c=this.coeff}return a}};
+// Depends on jsbn.js and rng.js
+// Version 1.1: support utf-8 encoding in pkcs1pad2
+// convert a (hex) string to a bignum object
+
+
+function parseBigInt(str, r)
+{
+    return new BigInteger(str, r);
+}
+
+function linebrk(s, n)
+{
+    var ret = "";
+    var i = 0;
+    while (i + n < s.length)
+    {
+        ret += s.substring(i, i + n) + "\n";
+        i += n;
+    }
+    return ret + s.substring(i, s.length);
+}
+
+function byte2Hex(b)
+{
+    if (b < 0x10) return "0" + b.toString(16);
+    else return b.toString(16);
+}
+
+// PKCS#1 (type 2, random) pad input string s to n bytes, and return a bigint
+
+
+function pkcs1pad2(s, n)
+{
+    if (n < s.length + 11)
+    { // TODO: fix for utf-8
+        //alert("Message too long for RSA (n=" + n + ", l=" + s.length + ")");
+        //return null;
+        throw "Message too long for RSA (n=" + n + ", l=" + s.length + ")";
+    }
+    var ba = new Array();
+    var i = s.length - 1;
+    while (i >= 0 && n > 0)
+    {
+        var c = s.charCodeAt(i--);
+        if (c < 128)
+        { // encode using utf-8
+            ba[--n] = c;
+        }
+        else if ((c > 127) && (c < 2048))
+        {
+            ba[--n] = (c & 63) | 128;
+            ba[--n] = (c >> 6) | 192;
+        }
+        else
+        {
+            ba[--n] = (c & 63) | 128;
+            ba[--n] = ((c >> 6) & 63) | 128;
+            ba[--n] = (c >> 12) | 224;
+        }
+    }
+    ba[--n] = 0;
+    var rng = new SecureRandom();
+    var x = new Array();
+    while (n > 2)
+    { // random non-zero pad
+        x[0] = 0;
+        while (x[0] == 0) rng.nextBytes(x);
+        ba[--n] = x[0];
+    }
+    ba[--n] = 2;
+    ba[--n] = 0;
+    return new BigInteger(ba);
+}
+
+// "empty" RSA key constructor
+
+
+function RSAKey()
+{
+    this.n = null;
+    this.e = 0;
+    this.d = null;
+    this.p = null;
+    this.q = null;
+    this.dmp1 = null;
+    this.dmq1 = null;
+    this.coeff = null;
+}
+// Set the public key fields N and e from hex strings
+
+
+function RSASetPublic(N, E)
+{
+    if (N != null && E != null && N.length > 0 && E.length > 0)
+    {
+        this.n = parseBigInt(N, 16);
+        this.e = parseInt(E, 16);
+    }
+    else alert("Invalid RSA public key");
+}
+
+// Perform raw public operation on "x": return x^e (mod n)
+
+
+function RSADoPublic(x)
+{
+    return x.modPowInt(this.e, this.n);
+}
+
+// Return the PKCS#1 RSA encryption of "text" as an even-length hex string
+
+
+function RSAEncrypt(text)
+{
+    var m = pkcs1pad2(text, (this.n.bitLength() + 7) >> 3);
+    if (m == null) return null;
+    var c = this.doPublic(m);
+    if (c == null) return null;
+    var h = c.toString(16);
+    if ((h.length & 1) == 0) return h;
+    else return "0" + h;
+}
+
+function RSAToJSON()
+{
+    return {
+        coeff: this.coeff.toString(16),
+        d: this.d.toString(16),
+        dmp1: this.dmp1.toString(16),
+        dmq1: this.dmq1.toString(16),
+        e: this.e.toString(16),
+        n: this.n.toString(16),
+        p: this.p.toString(16),
+        q: this.q.toString(16),
+    }
+}
+
+function RSAParse(rsaString) {
+    var json = JSON.parse(rsaString);
+    var rsa = new RSAKey();
+
+    rsa.setPrivateEx(json.n, json.e, json.d, json.p, json.q, json.dmp1, json.dmq1, json.coeff);
+
+    return rsa;
+}
+
+// Return the PKCS#1 RSA encryption of "text" as a Base64-encoded string
+//function RSAEncryptB64(text) {
+//  var h = this.encrypt(text);
+//  if(h) return hex2b64(h); else return null;
+//}
+// protected
+RSAKey.prototype.doPublic = RSADoPublic;
+
+// public
+RSAKey.prototype.setPublic = RSASetPublic;
+RSAKey.prototype.encrypt = RSAEncrypt;
+RSAKey.prototype.toJSON = RSAToJSON;
+RSAKey.parse = RSAParse;
+
+// Version 1.1: support utf-8 decoding in pkcs1unpad2
+// Undo PKCS#1 (type 2, random) padding and, if valid, return the plaintext
+
+function pkcs1unpad2(d, n)
+{
+    var b = d.toByteArray();
+    var i = 0;
+    while (i < b.length && b[i] == 0)++i;
+    if (b.length - i != n - 1 || b[i] != 2) return null;
+    ++i;
+    while (b[i] != 0)
+    if (++i >= b.length) return null;
+    var ret = "";
+    while (++i < b.length)
+    {
+        var c = b[i] & 255;
+        if (c < 128)
+        { // utf-8 decode
+            ret += String.fromCharCode(c);
+        }
+        else if ((c > 191) && (c < 224))
+        {
+            ret += String.fromCharCode(((c & 31) << 6) | (b[i + 1] & 63));
+            ++i;
+        }
+        else
+        {
+            ret += String.fromCharCode(((c & 15) << 12) | ((b[i + 1] & 63) << 6) | (b[i + 2] & 63));
+            i += 2;
+        }
+    }
+    return ret;
+}
+
+// Set the private key fields N, e, and d from hex strings
+function RSASetPrivate(N, E, D)
+{
+    if (N != null && E != null && N.length > 0 && E.length > 0)
+    {
+        this.n = parseBigInt(N, 16);
+        this.e = parseInt(E, 16);
+        this.d = parseBigInt(D, 16);
+    }
+    else alert("Invalid RSA private key");
+}
+
+// Set the private key fields N, e, d and CRT params from hex strings
+function RSASetPrivateEx(N, E, D, P, Q, DP, DQ, C)
+{
+    if (N != null && E != null && N.length > 0 && E.length > 0)
+    {
+        this.n = parseBigInt(N, 16);
+        this.e = parseInt(E, 16);
+        this.d = parseBigInt(D, 16);
+        this.p = parseBigInt(P, 16);
+        this.q = parseBigInt(Q, 16);
+        this.dmp1 = parseBigInt(DP, 16);
+        this.dmq1 = parseBigInt(DQ, 16);
+        this.coeff = parseBigInt(C, 16);
+    }
+    else alert("Invalid RSA private key");
+}
+
+// Generate a new random private key B bits long, using public expt E
+function RSAGenerate(B, E)
+{
+    var rng = new SeededRandom();
+    var qs = B >> 1;
+    this.e = parseInt(E, 16);
+    var ee = new BigInteger(E, 16);
+    for (;;)
+    {
+        for (;;)
+        {
+            this.p = new BigInteger(B - qs, 1, rng);
+            if (this.p.subtract(BigInteger.ONE).gcd(ee).compareTo(BigInteger.ONE) == 0 && this.p.isProbablePrime(10)) break;
+        }
+        for (;;)
+        {
+            this.q = new BigInteger(qs, 1, rng);
+            if (this.q.subtract(BigInteger.ONE).gcd(ee).compareTo(BigInteger.ONE) == 0 && this.q.isProbablePrime(10)) break;
+        }
+        if (this.p.compareTo(this.q) <= 0)
+        {
+            var t = this.p;
+            this.p = this.q;
+            this.q = t;
+        }
+        var p1 = this.p.subtract(BigInteger.ONE);
+        var q1 = this.q.subtract(BigInteger.ONE);
+        var phi = p1.multiply(q1);
+        if (phi.gcd(ee).compareTo(BigInteger.ONE) == 0)
+        {
+            this.n = this.p.multiply(this.q);
+            this.d = ee.modInverse(phi);
+            this.dmp1 = this.d.mod(p1);
+            this.dmq1 = this.d.mod(q1);
+            this.coeff = this.q.modInverse(this.p);
+            break;
+        }
+    }
+}
+
+// Perform raw private operation on "x": return x^d (mod n)
+function RSADoPrivate(x)
+{
+    if (this.p == null || this.q == null) return x.modPow(this.d, this.n);
+    // TODO: re-calculate any missing CRT params
+    var xp = x.mod(this.p).modPow(this.dmp1, this.p);
+    var xq = x.mod(this.q).modPow(this.dmq1, this.q);
+    while (xp.compareTo(xq) < 0)
+    xp = xp.add(this.p);
+    return xp.subtract(xq).multiply(this.coeff).mod(this.p).multiply(this.q).add(xq);
+}
+
+// Return the PKCS#1 RSA decryption of "ctext".
+// "ctext" is an even-length hex string and the output is a plain string.
+function RSADecrypt(ctext)
+{
+    var c = parseBigInt(ctext, 16);
+    var m = this.doPrivate(c);
+    if (m == null) return null;
+    return pkcs1unpad2(m, (this.n.bitLength() + 7) >> 3);
+}
+
+// protected
+RSAKey.prototype.doPrivate = RSADoPrivate;
+
+// public
+RSAKey.prototype.setPrivate = RSASetPrivate;
+RSAKey.prototype.setPrivateEx = RSASetPrivateEx;
+RSAKey.prototype.generate = RSAGenerate;
+RSAKey.prototype.decrypt = RSADecrypt;
+
+
+//
+// rsa-sign.js - adding signing functions to RSAKey class.
+//
+//
+// version: 1.0 (2010-Jun-03)
+//
+// Copyright (c) 2010 Kenji Urushima (kenji.urushima@gmail.com)
+//
+// This software is licensed under the terms of the MIT License.
+// http://www.opensource.org/licenses/mit-license.php
+//
+// The above copyright and license notice shall be 
+// included in all copies or substantial portions of the Software.
+//
+// Depends on:
+//   function sha1.hex(s) of sha1.js
+//   jsbn.js
+//   jsbn2.js
+//   rsa.js
+//   rsa2.js
+//
+// keysize / pmstrlen
+//  512 /  128
+// 1024 /  256
+// 2048 /  512
+// 4096 / 1024
+// As for _RSASGIN_DIHEAD values for each hash algorithm, see PKCS#1 v2.1 spec (p38).
+var _RSASIGN_DIHEAD = [];
+_RSASIGN_DIHEAD['sha1'] = "3021300906052b0e03021a05000414";
+_RSASIGN_DIHEAD['sha256'] = "3031300d060960864801650304020105000420";
+//_RSASIGN_DIHEAD['md2'] = "3020300c06082a864886f70d020205000410";
+//_RSASIGN_DIHEAD['md5'] = "3020300c06082a864886f70d020505000410";
+//_RSASIGN_DIHEAD['sha384'] = "3041300d060960864801650304020205000430";
+//_RSASIGN_DIHEAD['sha512'] = "3051300d060960864801650304020305000440";
+var _RSASIGN_HASHHEXFUNC = [];
+_RSASIGN_HASHHEXFUNC['sha1'] = sha1.hex;
+_RSASIGN_HASHHEXFUNC['sha256'] = sha256.hex;
+
+// ========================================================================
+// Signature Generation
+// ========================================================================
+
+function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg)
+{
+    var pmStrLen = keySize / 4;
+    var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg];
+    var sHashHex = hashFunc(s);
+
+    var sHead = "0001";
+    var sTail = "00" + _RSASIGN_DIHEAD[hashAlg] + sHashHex;
+    var sMid = "";
+    var fLen = pmStrLen - sHead.length - sTail.length;
+    for (var i = 0; i < fLen; i += 2)
+    {
+        sMid += "ff";
+    }
+    sPaddedMessageHex = sHead + sMid + sTail;
+    return sPaddedMessageHex;
+}
+
+function _rsasign_signString(s, hashAlg)
+{
+    var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), hashAlg);
+    var biPaddedMessage = parseBigInt(hPM, 16);
+    var biSign = this.doPrivate(biPaddedMessage);
+    var hexSign = biSign.toString(16);
+    return hexSign;
+}
+
+function _rsasign_signStringWithSHA1(s)
+{
+    var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha1');
+    var biPaddedMessage = parseBigInt(hPM, 16);
+    var biSign = this.doPrivate(biPaddedMessage);
+    var hexSign = biSign.toString(16);
+    return hexSign;
+}
+
+function _rsasign_signStringWithSHA256(s)
+{
+    var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha256');
+    var biPaddedMessage = parseBigInt(hPM, 16);
+    var biSign = this.doPrivate(biPaddedMessage);
+    var hexSign = biSign.toString(16);
+    return hexSign;
+}
+
+// ========================================================================
+// Signature Verification
+// ========================================================================
+
+function _rsasign_getDecryptSignatureBI(biSig, hN, hE)
+{
+    var rsa = new RSAKey();
+    rsa.setPublic(hN, hE);
+    var biDecryptedSig = rsa.doPublic(biSig);
+    return biDecryptedSig;
+}
+
+function _rsasign_getHexDigestInfoFromSig(biSig, hN, hE)
+{
+    var biDecryptedSig = _rsasign_getDecryptSignatureBI(biSig, hN, hE);
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    return hDigestInfo;
+}
+
+function _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo)
+{
+    for (var algName in _RSASIGN_DIHEAD)
+    {
+        var head = _RSASIGN_DIHEAD[algName];
+        var len = head.length;
+        if (hDigestInfo.substring(0, len) == head)
+        {
+            var a = [algName, hDigestInfo.substring(len)];
+            return a;
+        }
+    }
+    return [];
+}
+
+function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE)
+{
+    var hDigestInfo = _rsasign_getHexDigestInfoFromSig(biSig, hN, hE);
+    var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+    if (digestInfoAry.length == 0) return false;
+    var algName = digestInfoAry[0];
+    var diHashValue = digestInfoAry[1];
+    var ff = _RSASIGN_HASHHEXFUNC[algName];
+    var msgHashValue = ff(sMsg);
+    return (diHashValue == msgHashValue);
+}
+
+function _rsasign_verifyHexSignatureForMessage(hSig, sMsg)
+{
+    var biSig = parseBigInt(hSig, 16);
+    var result = _rsasign_verifySignatureWithArgs(sMsg, biSig, this.n.toString(16), this.e.toString(16));
+    return result;
+}
+
+function _rsasign_verifyString(sMsg, hSig)
+{
+    hSig = hSig.replace(/[ \n]+/g, "");
+    var biSig = parseBigInt(hSig, 16);
+    var biDecryptedSig = this.doPublic(biSig);
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+
+    if (digestInfoAry.length == 0) return false;
+    var algName = digestInfoAry[0];
+    var diHashValue = digestInfoAry[1];
+    var ff = _RSASIGN_HASHHEXFUNC[algName];
+    var msgHashValue = ff(sMsg);
+    return (diHashValue == msgHashValue);
+}
+
+RSAKey.prototype.signString = _rsasign_signString;
+RSAKey.prototype.signStringWithSHA1 = _rsasign_signStringWithSHA1;
+RSAKey.prototype.signStringWithSHA256 = _rsasign_signStringWithSHA256;
+
+RSAKey.prototype.verifyString = _rsasign_verifyString;
+RSAKey.prototype.verifyHexSignatureForMessage = _rsasign_verifyHexSignatureForMessage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
